@@ -50,3 +50,10 @@ node_modules/
 
 # macOS
 .DS_Store
+
+# Agent / editor workspace metadata
+.agent-context/
+.claude/
+.opencode/
+AGENTS.md
+CLAUDE.md
