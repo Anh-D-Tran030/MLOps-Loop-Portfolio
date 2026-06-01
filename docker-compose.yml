@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  forecast-api:
+    image: ghcr.io/anh-d-tran030/mlops-loop:latest
+    ports: ["8000:8000"]
+    volumes:
+      - ./monitoring/evidently/reference_data.parquet:/app/reference_data.parquet
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    ports: ["9090:9090"]
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    ports: ["3000:3000"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on: [prometheus]

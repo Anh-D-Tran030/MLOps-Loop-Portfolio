@@ -1,0 +1,76 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install ruff black
+      - run: ruff check . && black --check .
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r services/forecast-api/requirements.txt
+      - run: pytest services/forecast-api/tests/ -v
+
+  eval-gate:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      # Cache HuggingFace model downloads to avoid re-downloading DeBERTa (~1.4GB) on every run
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-${{ hashFiles('services/llm-eval/requirements.txt') }}
+      - run: pip install -e services/llm-eval/
+      - run: mlops-eval score tests/fixtures/eval_set.jsonl --threshold 0.7
+
+  build-push:
+    needs: eval-gate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      # Generate a placeholder model.pkl for image-shape verification only.
+      # Real model.pkl is produced by running: python services/forecast-api/training/train.py
+      # against the Kaggle Store Sales dataset (data/train.csv).
+      - name: Generate placeholder model.pkl for image build
+        run: |
+          cd services/forecast-api
+          pip install -r requirements.txt
+          python -c "
+          import joblib, numpy as np, lightgbm as lgb
+          X = np.random.rand(100, 6); y = np.random.rand(100)
+          m = lgb.LGBMRegressor(n_estimators=10).fit(X, y)
+          joblib.dump(m, 'model.pkl')
+          "
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: services/forecast-api
+          push: true
+          tags: ghcr.io/anh-d-tran030/mlops-loop:latest

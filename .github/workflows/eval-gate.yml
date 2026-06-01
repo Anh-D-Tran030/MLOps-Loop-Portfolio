@@ -1,0 +1,20 @@
+name: Eval Gate
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      # Cache HuggingFace model downloads to avoid re-downloading DeBERTa (~1.4GB) on every run
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-${{ hashFiles('services/llm-eval/requirements.txt') }}
+      - run: pip install -e services/llm-eval/
+      - run: mlops-eval score tests/fixtures/eval_set.jsonl --threshold 0.7

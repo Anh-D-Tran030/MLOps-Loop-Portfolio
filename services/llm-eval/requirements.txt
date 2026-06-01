@@ -1,0 +1,6 @@
+transformers>=4.35.0
+sentence-transformers>=2.2.0
+torch>=2.0.0
+ragas==0.1.21
+click>=8.1.0
+pytest>=7.4.0
