@@ -1,0 +1,48 @@
+name: Promote Model
+on:
+  workflow_dispatch:
+    inputs:
+      model_version:
+        description: 'MLflow version to promote to Production'
+        required: true
+        type: string
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r services/forecast-api/training/requirements.txt
+
+      - name: Restore MLflow state
+        uses: actions/cache/restore@v4
+        with:
+          path: mlflow/
+          key: mlflow-state-${{ github.run_id }}
+          restore-keys: |
+            mlflow-state-
+
+      - name: Promote model version
+        run: python scripts/promote_model.py --version "${{ inputs.model_version }}"
+
+      - name: Save MLflow state
+        uses: actions/cache/save@v4
+        with:
+          path: mlflow/
+          key: mlflow-state-${{ github.run_id }}
+
+      - name: Create release tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TAG="v$(date +%Y%m%d%H%M%S)"
+          git tag "$TAG"
+          git push origin "$TAG"

@@ -6,8 +6,10 @@
 # Exception: reference_data.parquet is the PSI baseline and must be committed
 !monitoring/evidently/reference_data.parquet
 
-# Training data (Kaggle dataset — not committed)
-data/
+# Training data (Kaggle dataset — not committed); DVC pointer file IS committed
+data/*
+!data/*.dvc
+!data/.gitignore
 
 # Python
 __pycache__/
@@ -31,6 +33,13 @@ env/
 htmlcov/
 .coverage
 *.log
+
+# MLflow state — kept locally and via actions/cache in CI; do not commit contents
+mlflow/*
+!mlflow/.gitkeep
+
+# Feast-generated state (registry + online store SQLite files)
+feature_repo/data/
 
 # HuggingFace model cache
 transformers_cache/
@@ -57,3 +66,7 @@ node_modules/
 .opencode/
 AGENTS.md
 CLAUDE.md
+PRD.md
+PHASE2-CLAUDE.md
+docs/repo-scaffold-prompt.md
+PRD.md

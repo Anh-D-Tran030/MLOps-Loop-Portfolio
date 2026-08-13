@@ -1,0 +1,68 @@
+name: Retrain Check
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      force_retrain:
+        description: 'Retrain even if drift is not significant (use for first-ever bootstrap run)'
+        type: boolean
+        default: false
+
+jobs:
+  check-and-retrain:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install dvc && pip install -r services/forecast-api/training/requirements.txt
+
+      - name: Fetch dataset via DVC
+        run: dvc pull data/train.csv.dvc
+
+      - name: Restore MLflow state
+        uses: actions/cache/restore@v4
+        with:
+          path: mlflow/
+          key: mlflow-state-${{ github.run_id }}
+          restore-keys: |
+            mlflow-state-
+
+      - name: Compute drift
+        id: drift
+        run: |
+          python scripts/simulate_current_window.py --out /tmp/current.parquet
+          python monitoring/evidently/drift_report.py --current /tmp/current.parquet > /tmp/psi.json
+          python - <<'EOF'
+          import json, os
+          psi = json.load(open('/tmp/psi.json'))
+          max_psi = max(psi.values())
+          retrain = "true" if max_psi > 0.2 else "false"
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'max_psi={max_psi}\nretrain={retrain}\n')
+          EOF
+
+      - name: Retrain model
+        if: steps.drift.outputs.retrain == 'true' || inputs.force_retrain
+        run: python services/forecast-api/training/train.py --use-optuna --register-as-staging
+
+      - name: Save MLflow state
+        if: steps.drift.outputs.retrain == 'true' || inputs.force_retrain
+        uses: actions/cache/save@v4
+        with:
+          path: mlflow/
+          key: mlflow-state-${{ github.run_id }}
+
+      - name: Open promotion issue
+        if: steps.drift.outputs.retrain == 'true' || inputs.force_retrain
+        run: python scripts/open_promotion_issue.py --max-psi "${{ steps.drift.outputs.max_psi }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

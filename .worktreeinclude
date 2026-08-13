@@ -1,0 +1,14 @@
+.claude/settings.json
+.claude/settings.local.json
+.agent-context/hooks/**
+.agent-context/scripts/**
+.agent-context/project.md
+.agent-context/conventions.md
+.agent-context/domain.md
+
+# Deliberately excluded (see .agent-context/pipeline-contract.md "Worktree safety"):
+# status.json / intercom.jsonl / memory/ / .heal_state — per-run state; copying it
+#   would make two worktrees believe they are the same run.
+# skills/ — shared success/fail counters would race across worktrees.
+# secrets, local databases, .venv/node_modules — no reason for a code-editing
+#   worktree to hold another copy; too large; run_tests.sh already degrades.
