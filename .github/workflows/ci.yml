@@ -63,7 +63,11 @@ jobs:
       - name: Install training dependencies
         run: pip install dvc && pip install -r services/forecast-api/training/requirements.txt
       - name: Fetch dataset via DVC
-        run: dvc pull data/train.csv.dvc
+        # dvc pull requires a configured remote (there isn't one, by design —
+        # no writable DVC remote without a paid cloud account, see PHASE2-CLAUDE.md).
+        # dvc update re-resolves an import-url dependency straight from its
+        # recorded source URL instead, which needs no remote at all.
+        run: dvc update data/train.csv.dvc
       - name: Restore MLflow state
         uses: actions/cache/restore@v4
         with:
