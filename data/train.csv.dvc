@@ -1,0 +1,13 @@
+md5: c1aebe4dd95468baac36ba3544bf9578
+frozen: true
+deps:
+- checksum: '"0x8DEF946EE04FAB8"'
+  size: 121800373
+  hash: md5
+  path: 
+    https://github.com/Anh-D-Tran030/MLOps-Loop-Portfolio/releases/download/data-v1/train.csv
+outs:
+- md5: b84434bf8eede5345ec04e41dfe9d86e
+  size: 121800373
+  hash: md5
+  path: train.csv
