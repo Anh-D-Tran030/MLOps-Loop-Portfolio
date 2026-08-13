@@ -34,6 +34,7 @@ PROM_OUTPUT = "/tmp/drift_metrics.prom"
 # PSI extraction helpers
 # ---------------------------------------------------------------------------
 
+
 def _psi_via_evidently(
     reference_df: pd.DataFrame,
     current_df: pd.DataFrame,
@@ -43,8 +44,8 @@ def _psi_via_evidently(
     Works with evidently>=0.4 (legacy API). Extracts drift_score from
     metrics[1]['result']['drift_by_columns'][col]['drift_score'].
     """
-    from evidently.legacy.report import Report  # type: ignore[import]
     from evidently.legacy.metric_preset import DataDriftPreset  # type: ignore[import]
+    from evidently.legacy.report import Report  # type: ignore[import]
 
     # Evidently requires numeric or categorical columns; align dtypes.
     cols = [c for c in reference_df.columns if c in current_df.columns]
@@ -146,6 +147,7 @@ def compute_psi(
 # Prometheus textfile writer
 # ---------------------------------------------------------------------------
 
+
 def write_prometheus_metrics(psi_scores: dict[str, float], output_path: str) -> None:
     """Write PSI scores as Prometheus textfile metrics."""
     lines = [
@@ -165,6 +167,7 @@ def write_prometheus_metrics(psi_scores: dict[str, float], output_path: str) -> 
 # ---------------------------------------------------------------------------
 # CLI entrypoint
 # ---------------------------------------------------------------------------
+
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(

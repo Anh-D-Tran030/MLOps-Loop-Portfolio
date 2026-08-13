@@ -9,16 +9,13 @@ from __future__ import annotations
 
 import json
 import tempfile
-from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
-
-from evaluator.faithfulness import FaithfulnessScorer
-from evaluator.relevance import RelevanceScorer
-from evaluator.precision import PrecisionScorer
 from evaluator.cli import cli
-
+from evaluator.faithfulness import FaithfulnessScorer
+from evaluator.precision import PrecisionScorer
+from evaluator.relevance import RelevanceScorer
 
 # ---------------------------------------------------------------------------
 # Shared fixtures
@@ -65,9 +62,7 @@ def test_faithfulness_entailment_returns_high_score(faithful_scorer):
 
 def test_faithfulness_contradiction_returns_low_score(faithful_scorer):
     """Answer directly contradicts the context: should score low."""
-    context = (
-        "The Eiffel Tower is located in Paris, France."
-    )
+    context = "The Eiffel Tower is located in Paris, France."
     answer = "The Eiffel Tower is located in London, England."
     result = faithful_scorer.score(context=context, answer=answer)
     assert isinstance(result, float)
@@ -148,17 +143,15 @@ def test_cli_pass_exits_zero():
     ]
 
     runner = CliRunner()
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".jsonl", delete=False
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as tmp:
         for s in samples:
             tmp.write(json.dumps(s) + "\n")
         tmp_path = tmp.name
 
     result = runner.invoke(cli, ["score", tmp_path, "--threshold", "0.7"])
-    assert result.exit_code == 0, (
-        f"Expected exit code 0, got {result.exit_code}.\nOutput:\n{result.output}"
-    )
+    assert (
+        result.exit_code == 0
+    ), f"Expected exit code 0, got {result.exit_code}.\nOutput:\n{result.output}"
     assert "OVERALL: PASS" in result.output
 
 
@@ -184,17 +177,15 @@ def test_cli_fail_exits_one():
     ]
 
     runner = CliRunner()
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".jsonl", delete=False
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as tmp:
         for s in samples:
             tmp.write(json.dumps(s) + "\n")
         tmp_path = tmp.name
 
     result = runner.invoke(cli, ["score", tmp_path, "--threshold", "0.7"])
-    assert result.exit_code == 1, (
-        f"Expected exit code 1, got {result.exit_code}.\nOutput:\n{result.output}"
-    )
+    assert (
+        result.exit_code == 1
+    ), f"Expected exit code 1, got {result.exit_code}.\nOutput:\n{result.output}"
     assert "FAIL" in result.output
 
 
@@ -211,9 +202,7 @@ def test_cli_missing_field_raises_error():
     ]
 
     runner = CliRunner()
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".jsonl", delete=False
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as tmp:
         for s in bad_samples:
             tmp.write(json.dumps(s) + "\n")
         tmp_path = tmp.name

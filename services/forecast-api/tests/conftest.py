@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import os
 import sys
-import tempfile
 
 import joblib
 import lightgbm as lgb
@@ -58,7 +57,9 @@ def minimal_model(tmp_path_factory: pytest.TempPathFactory) -> str:
     family_ohe = encoder.fit_transform(X_raw[["family"]])
     ohe_cols = encoder.get_feature_names_out(["family"])
     ohe_df = pd.DataFrame(family_ohe, columns=ohe_cols)
-    X = pd.concat([X_raw.drop(columns=["family"]).reset_index(drop=True), ohe_df], axis=1)
+    X = pd.concat(
+        [X_raw.drop(columns=["family"]).reset_index(drop=True), ohe_df], axis=1
+    )
 
     model = lgb.LGBMRegressor(
         n_estimators=10,
@@ -80,8 +81,8 @@ def test_client(minimal_model: str) -> TestClient:
     # Point the LGBMModel loader at the temp model.pkl before importing app
     os.environ["MODEL_PKL_PATH"] = minimal_model
 
-    from app.model import LGBMModel
     from app.main import app
+    from app.model import LGBMModel
 
     # Override the model on app state directly after lifespan runs via TestClient
     with TestClient(app) as client:

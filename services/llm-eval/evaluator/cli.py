@@ -15,8 +15,8 @@ from pathlib import Path
 import click
 
 from evaluator.faithfulness import FaithfulnessScorer
-from evaluator.relevance import RelevanceScorer
 from evaluator.precision import PrecisionScorer
+from evaluator.relevance import RelevanceScorer
 
 REQUIRED_FIELDS = {"question", "context", "answer"}
 

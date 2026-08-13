@@ -24,7 +24,6 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import train_test_split
 
 # Ensure the service root is on sys.path so features.py is importable.
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +31,7 @@ _SERVICE_DIR = os.path.dirname(_THIS_DIR)
 if _SERVICE_DIR not in sys.path:
     sys.path.insert(0, _SERVICE_DIR)
 
-from training.features import (  # noqa: E402
+from training.features import (
     add_lag_features,
     add_rolling_features,
     encode_categoricals,
@@ -114,9 +113,7 @@ def train(data_path: str = DEFAULT_DATA_PATH) -> None:
     X_train, X_val = X.iloc[:split_idx], X.iloc[split_idx:]
     y_train, y_val = y[:split_idx], y[split_idx:]
 
-    logger.info(
-        "Split: %d train rows / %d val rows", len(X_train), len(X_val)
-    )
+    logger.info("Split: %d train rows / %d val rows", len(X_train), len(X_val))
 
     # 5. Fit LightGBM
     model = lgb.LGBMRegressor(**MODEL_PARAMS)
@@ -144,7 +141,9 @@ def train(data_path: str = DEFAULT_DATA_PATH) -> None:
 def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Train LightGBM demand forecasting model")
+    parser = argparse.ArgumentParser(
+        description="Train LightGBM demand forecasting model"
+    )
     parser.add_argument(
         "--data-path",
         default=DEFAULT_DATA_PATH,

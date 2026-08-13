@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ _SERVICE_DIR = os.path.dirname(_THIS_DIR)
 if _SERVICE_DIR not in sys.path:
     sys.path.insert(0, _SERVICE_DIR)
 
-from training.features import (  # noqa: E402
+from training.features import (
     add_lag_features,
     add_rolling_features,
     encode_categoricals,
@@ -45,8 +45,8 @@ class LGBMModel:
     def __init__(self, model_path: str = "model.pkl") -> None:
         self.model_version = MODEL_VERSION
         self.model_loaded = False
-        self._model: Optional[Any] = None
-        self._encoder: Optional[Any] = None
+        self._model: Any | None = None
+        self._encoder: Any | None = None
 
         self._load(model_path)
 
@@ -72,7 +72,7 @@ class LGBMModel:
                 self._encoder = None
             self.model_loaded = True
             logger.info("Model loaded from '%s'", model_path)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 — model load must never crash startup
             logger.error("Failed to load model from '%s': %s", model_path, exc)
 
     def predict(self, features: dict, days_ahead: int = 30) -> list[float]:
@@ -91,7 +91,9 @@ class LGBMModel:
             List of `days_ahead` non-negative float predictions.
         """
         if not self.model_loaded or self._model is None:
-            logger.warning("Model not loaded — returning zeros for %d steps", days_ahead)
+            logger.warning(
+                "Model not loaded — returning zeros for %d steps", days_ahead
+            )
             return [0.0] * days_ahead
 
         try:
@@ -99,8 +101,8 @@ class LGBMModel:
             raw = self._model.predict(rows)
             # Clip to non-negative sales
             return [max(0.0, float(v)) for v in raw]
-        except Exception as exc:
-            logger.error("Inference error: %s", exc, exc_info=True)
+        except Exception:
+            logger.exception("Inference error")
             return [0.0] * days_ahead
 
     def _build_feature_rows(self, features: dict, days_ahead: int) -> pd.DataFrame:
@@ -131,8 +133,10 @@ class LGBMModel:
                 "family": family,
                 "onpromotion": onpromotion,
                 # Append a placeholder sales value for lag computation
-                "sales": history[-(14 - i)] if i < 14 else float(
-                    np.mean(history[-7:]) if history else 0.0
+                "sales": (
+                    history[-(14 - i)]
+                    if i < 14
+                    else float(np.mean(history[-7:]) if history else 0.0)
                 ),
             }
             rows.append(row)

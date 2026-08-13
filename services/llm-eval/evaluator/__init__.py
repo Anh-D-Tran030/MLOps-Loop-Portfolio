@@ -1,5 +1,5 @@
 from .faithfulness import FaithfulnessScorer
-from .relevance import RelevanceScorer
 from .precision import PrecisionScorer
+from .relevance import RelevanceScorer
 
-__all__ = ["FaithfulnessScorer", "RelevanceScorer", "PrecisionScorer"]
+__all__ = ["FaithfulnessScorer", "PrecisionScorer", "RelevanceScorer"]

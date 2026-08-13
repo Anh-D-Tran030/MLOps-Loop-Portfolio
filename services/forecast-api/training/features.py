@@ -8,9 +8,7 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import Optional
 
-import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
@@ -20,15 +18,15 @@ logger = logging.getLogger(__name__)
 # Kaggle Store Sales dataset which covers Ecuador retail stores.
 # Days-to-holiday is computed as the minimum days to the next holiday.
 _HOLIDAYS: list[tuple[int, int]] = [
-    (1, 1),   # New Year
-    (5, 1),   # Labour Day
-    (7, 4),   # Independence Day (simplified)
+    (1, 1),  # New Year
+    (5, 1),  # Labour Day
+    (7, 4),  # Independence Day (simplified)
     (8, 10),  # Independence Day (Quito)
     (10, 9),  # Independence of Guayaquil
     (11, 2),  # All Souls Day
     (11, 3),  # Independence of Cuenca
-    (12, 25), # Christmas
-    (12, 31), # New Year's Eve
+    (12, 25),  # Christmas
+    (12, 31),  # New Year's Eve
 ]
 
 
@@ -114,7 +112,7 @@ def add_rolling_features(df: pd.DataFrame) -> pd.DataFrame:
 def encode_categoricals(
     df: pd.DataFrame,
     fit: bool = False,
-    encoder: Optional[OneHotEncoder] = None,
+    encoder: OneHotEncoder | None = None,
 ) -> tuple[pd.DataFrame, OneHotEncoder]:
     """One-hot encode the 'family' column.
 

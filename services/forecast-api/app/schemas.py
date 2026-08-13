@@ -1,6 +1,6 @@
 """Pydantic v2 request/response schemas for the Forecast API."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class PredictRequest(BaseModel):
