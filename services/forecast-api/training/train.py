@@ -22,11 +22,12 @@ import sys
 
 import joblib
 import lightgbm as lgb
-import mlflow
 import numpy as np
 import pandas as pd
-from mlflow import MlflowClient
 from sklearn.metrics import mean_squared_error
+
+import mlflow
+from mlflow import MlflowClient
 
 # Ensure the service root is on sys.path so features.py is importable.
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -34,7 +35,7 @@ _SERVICE_DIR = os.path.dirname(_THIS_DIR)
 if _SERVICE_DIR not in sys.path:
     sys.path.insert(0, _SERVICE_DIR)
 
-from training.features import encode_categoricals  # noqa: E402
+from training.features import encode_categoricals
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s — %(message)s")
 logger = logging.getLogger(__name__)
