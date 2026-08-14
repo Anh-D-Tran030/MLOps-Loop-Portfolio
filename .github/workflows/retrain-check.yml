@@ -35,7 +35,9 @@ jobs:
       - name: Restore MLflow state
         uses: actions/cache/restore@v4
         with:
-          path: mlflow/
+          path: |
+            mlflow/
+            mlruns/
           key: mlflow-state-${{ github.run_id }}
           restore-keys: |
             mlflow-state-
@@ -62,7 +64,9 @@ jobs:
         if: steps.drift.outputs.retrain == 'true' || inputs.force_retrain
         uses: actions/cache/save@v4
         with:
-          path: mlflow/
+          path: |
+            mlflow/
+            mlruns/
           key: mlflow-state-${{ github.run_id }}
 
       - name: Open promotion issue

@@ -13,7 +13,13 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Uses PROMOTE_PAT instead of the default GITHUB_TOKEN: GitHub deliberately
+      # blocks new workflow runs from being triggered by a push made with the
+      # default token (anti-recursion safety), which silently prevented this
+      # job's own tag push below from ever triggering ci.yml's build-push job.
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PROMOTE_PAT }}
 
       - uses: actions/setup-python@v5
         with:
@@ -25,7 +31,9 @@ jobs:
       - name: Restore MLflow state
         uses: actions/cache/restore@v4
         with:
-          path: mlflow/
+          path: |
+            mlflow/
+            mlruns/
           key: mlflow-state-${{ github.run_id }}
           restore-keys: |
             mlflow-state-
@@ -36,7 +44,9 @@ jobs:
       - name: Save MLflow state
         uses: actions/cache/save@v4
         with:
-          path: mlflow/
+          path: |
+            mlflow/
+            mlruns/
           key: mlflow-state-${{ github.run_id }}
 
       - name: Create release tag
