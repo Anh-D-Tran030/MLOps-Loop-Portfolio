@@ -35,7 +35,7 @@ _SERVICE_DIR = os.path.dirname(_THIS_DIR)
 if _SERVICE_DIR not in sys.path:
     sys.path.insert(0, _SERVICE_DIR)
 
-from training.features import encode_categoricals
+from training.features import encode_categoricals  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s — %(message)s")
 logger = logging.getLogger(__name__)

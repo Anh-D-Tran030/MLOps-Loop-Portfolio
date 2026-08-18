@@ -24,7 +24,7 @@ _SERVICE_DIR = os.path.dirname(_THIS_DIR)
 if _SERVICE_DIR not in sys.path:
     sys.path.insert(0, _SERVICE_DIR)
 
-from training.features import (
+from training.features import (  # noqa: E402
     add_lag_features,
     add_rolling_features,
     encode_categoricals,

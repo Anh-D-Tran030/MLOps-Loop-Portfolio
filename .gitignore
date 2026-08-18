@@ -7,7 +7,7 @@
 !monitoring/evidently/reference_data.parquet
 
 # Training data (Kaggle dataset — not committed); DVC pointer file IS committed
-data/*
+data/* 
 !data/*.dvc
 !data/.gitignore
 

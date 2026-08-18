@@ -38,7 +38,7 @@ _SERVICE_DIR = os.path.join(os.path.dirname(_THIS_DIR), "services", "forecast-ap
 if _SERVICE_DIR not in sys.path:
     sys.path.insert(0, _SERVICE_DIR)
 
-from training.features import extract_date_features
+from training.features import extract_date_features  # noqa: E402
 
 
 def build_window(apply_shift: bool) -> pd.DataFrame:
